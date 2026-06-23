@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WhatsApp CRM",
-  description: "WhatsApp CRM Dashboard",
+  title: "Sultan CRM",
+  description: "Sultan Tracker CRM Dashboard",
 };
 
 export default function RootLayout({

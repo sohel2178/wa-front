@@ -14,16 +14,28 @@ export default function ProtectedRoute({ children }: Props) {
 
   const token = useAuthStore((state) => state.token);
 
+  const initialized = useAuthStore((state) => state.initialized);
+
   useEffect(() => {
+    if (!initialized) return;
+
     if (!token) {
       router.replace("/login");
     }
-  }, [token, router]);
+  }, [token, initialized, router]);
+
+  if (!initialized) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   if (!token) {
     return (
       <div className="h-screen flex items-center justify-center">
-        Loading...
+        Redirecting...
       </div>
     );
   }
