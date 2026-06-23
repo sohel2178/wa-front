@@ -16,11 +16,10 @@ import { getTags } from "@/lib/tag-api";
 import SearchBar from "@/components/conversations/SearchBar";
 import LabelSidebar from "@/components/tags/LabelSidebar";
 import CreateTagDialog from "@/components/tags/CreateTagDialog";
-import EditTagDialog from "@/components/tags/EditTagDialog";
-import DeleteTagDialog from "@/components/tags/DeleteTagDialog";
 import ManageLabelsDialog from "@/components/tags/ManageLabelsDialog";
 import { Conversation } from "@/types/conversation";
 import AssignLabelsDialog from "@/components/tags/AssignLabelsDialog";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function ConversationsPage() {
   const socket = useSocket();
@@ -41,12 +40,6 @@ export default function ConversationsPage() {
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
 
   const [showCreateLabel, setShowCreateLabel] = useState(false);
-
-  const [showEditDialog, setShowEditDialog] = useState(false);
-
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const [showAssignLabels, setShowAssignLabels] = useState(false);
 
   const [showManageLabels, setShowManageLabels] = useState(false);
 
@@ -133,64 +126,66 @@ export default function ConversationsPage() {
   };
 
   return (
-    <MainLayout>
-      <div className="w-96 border-r flex flex-col h-screen">
-        <SearchBar value={search} onChange={setSearch} />
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="w-96 border-r flex flex-col h-screen">
+          <SearchBar value={search} onChange={setSearch} />
 
-        <LabelSidebar
-          tags={tags}
-          selectedTagId={selectedTagId}
-          onSelect={setSelectedTagId}
-          onCreate={() => setShowCreateLabel(true)}
-          onManage={() => setShowManageLabels(true)}
+          <LabelSidebar
+            tags={tags}
+            selectedTagId={selectedTagId}
+            onSelect={setSelectedTagId}
+            onCreate={() => setShowCreateLabel(true)}
+            onManage={() => setShowManageLabels(true)}
+          />
+
+          <div className="flex-1 overflow-y-auto">
+            <ConversationList
+              conversations={filteredConversations}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+              onAssignLabels={(conversation) =>
+                setAssignLabelConversation(conversation)
+              }
+            />
+          </div>
+        </div>
+
+        {selectedConversation ? (
+          <ChatWindow
+            conversation={selectedConversation}
+            tags={tags}
+            onLabelsUpdated={() => {
+              loadConversations();
+            }}
+          />
+        ) : (
+          <EmptyChat />
+        )}
+
+        <CreateTagDialog
+          open={showCreateLabel}
+          onClose={() => setShowCreateLabel(false)}
+          onCreated={loadTags}
         />
 
-        <div className="flex-1 overflow-y-auto">
-          <ConversationList
-            conversations={filteredConversations}
-            selectedId={selectedId}
-            onSelect={handleSelect}
-            onAssignLabels={(conversation) =>
-              setAssignLabelConversation(conversation)
-            }
-          />
-        </div>
-      </div>
-
-      {selectedConversation ? (
-        <ChatWindow
-          conversation={selectedConversation}
+        <ManageLabelsDialog
+          open={showManageLabels}
           tags={tags}
-          onLabelsUpdated={() => {
+          onClose={() => setShowManageLabels(false)}
+          onRefresh={loadTags}
+        />
+
+        <AssignLabelsDialog
+          open={!!assignLabelConversation}
+          conversation={assignLabelConversation}
+          tags={tags}
+          onClose={() => setAssignLabelConversation(null)}
+          onSaved={() => {
             loadConversations();
           }}
         />
-      ) : (
-        <EmptyChat />
-      )}
-
-      <CreateTagDialog
-        open={showCreateLabel}
-        onClose={() => setShowCreateLabel(false)}
-        onCreated={loadTags}
-      />
-
-      <ManageLabelsDialog
-        open={showManageLabels}
-        tags={tags}
-        onClose={() => setShowManageLabels(false)}
-        onRefresh={loadTags}
-      />
-
-      <AssignLabelsDialog
-        open={!!assignLabelConversation}
-        conversation={assignLabelConversation}
-        tags={tags}
-        onClose={() => setAssignLabelConversation(null)}
-        onSaved={() => {
-          loadConversations();
-        }}
-      />
-    </MainLayout>
+      </MainLayout>
+    </ProtectedRoute>
   );
 }

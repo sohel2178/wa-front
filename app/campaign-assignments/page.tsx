@@ -61,6 +61,24 @@ export default function CampaignAssignmentsPage() {
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assignment | null>(null);
 
+  const [syncLoading, setSyncLoading] = useState(false);
+
+  const handleSyncCampaigns = async () => {
+    try {
+      setSyncLoading(true);
+
+      await api.post("/meta/sync");
+
+      toast.success("Campaigns synced successfully");
+
+      await loadData();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to sync campaigns");
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -180,15 +198,25 @@ export default function CampaignAssignmentsPage() {
             </p>
           </div>
 
-          <Button
-            onClick={() => {
-              setSelectedAssignment(null);
-              setDialogOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Assign Campaign
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleSyncCampaigns}
+              disabled={syncLoading}
+            >
+              {syncLoading ? "Syncing..." : "Sync Campaigns"}
+            </Button>
+
+            <Button
+              onClick={() => {
+                setSelectedAssignment(null);
+                setDialogOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Assign Campaign
+            </Button>
+          </div>
         </div>
 
         {loading ? (

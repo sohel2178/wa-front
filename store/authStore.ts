@@ -12,6 +12,8 @@ type AuthState = {
 
   initialize: () => Promise<void>;
 
+  initialized: boolean;
+
   logout: () => void;
 };
 
@@ -19,6 +21,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
 
   user: null,
+  initialized: false,
 
   setToken: (token) => set({ token }),
 
@@ -37,6 +40,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         token,
         user: data.user,
+        initialized: true,
       });
     } catch {
       localStorage.removeItem("token");
@@ -44,6 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         token: null,
         user: null,
+        initialized: true,
       });
     }
   },
