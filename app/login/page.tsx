@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 export default function LoginPage() {
   const router = useRouter();
 
-  const { setUser } = useAuthStore();
+  const { setUser, setToken } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,6 +40,8 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
 
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
+      setToken(data.token);
 
       const meResponse = await api.get("/auth/me");
 
