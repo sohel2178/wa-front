@@ -13,6 +13,7 @@ import MessageList from "./MessageList";
 import { Message, MessageStatus } from "@/types/message";
 import AssignLabelsDialog from "../tags/AssignLabelsDialog";
 import { Tag } from "@/types/tag";
+import ScheduleFollowupDialog from "../followups/ScheduleFollowupDialog";
 
 type Props = {
   conversation: Conversation;
@@ -36,6 +37,8 @@ export default function ChatWindow({
   const [showAssignLabels, setShowAssignLabels] = useState(false);
 
   const [showSearch, setShowSearch] = useState(false);
+
+  const [followupOpen, setFollowupOpen] = useState(false);
 
   const loadMessages = useCallback(async () => {
     if (!conversation?._id) return;
@@ -124,6 +127,7 @@ export default function ChatWindow({
         conversation={conversation}
         onAssignLabels={() => setShowAssignLabels(true)}
         onSearchMessages={() => setShowSearch(true)}
+        onScheduleFollowup={() => setFollowupOpen(true)}
       />
 
       {loading ? (
@@ -144,6 +148,12 @@ export default function ChatWindow({
         onSaved={() => {
           onLabelsUpdated();
         }}
+      />
+
+      <ScheduleFollowupDialog
+        open={followupOpen}
+        onOpenChange={setFollowupOpen}
+        conversationId={conversation._id}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import {
   LogOut,
   User,
   UserCheck,
+  CalendarDays,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -49,6 +50,10 @@ export default function AppSidebar() {
 
       <Link href="/contacts">
         <Users className="h-6 w-6" />
+      </Link>
+
+      <Link href="/followups">
+        <CalendarDays className="h-6 w-6" />
       </Link>
 
       <button onClick={handleLogout}>

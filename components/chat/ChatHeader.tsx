@@ -1,5 +1,5 @@
 import { Conversation } from "@/types/conversation";
-import { Search, Tag, MoreVertical } from "lucide-react";
+import { Search, Tag, MoreVertical, CalendarDays } from "lucide-react";
 
 type Props = {
   conversation: Conversation;
@@ -7,12 +7,14 @@ type Props = {
   onAssignLabels: () => void;
 
   onSearchMessages: () => void;
+  onScheduleFollowup: () => void;
 };
 
 export default function ChatHeader({
   conversation,
   onAssignLabels,
   onSearchMessages,
+  onScheduleFollowup,
 }: Props) {
   return (
     <div className="border-b bg-background px-4 py-3">
@@ -36,6 +38,14 @@ export default function ChatHeader({
             title="Search Messages"
           >
             <Search className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={onScheduleFollowup}
+            className="p-2 rounded-full hover:bg-muted transition"
+            title="Follow Up"
+          >
+            <CalendarDays className="h-5 w-5" />
           </button>
 
           <button

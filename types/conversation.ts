@@ -1,5 +1,12 @@
 import { Tag } from "./tag";
 
+export interface FollowUp {
+  date: string | null;
+  note: string;
+  completed: boolean;
+  completedAt: string | null;
+}
+
 export interface Conversation {
   _id: string;
 
@@ -17,6 +24,8 @@ export interface Conversation {
   } | null;
 
   labels?: Tag[];
+
+  followUp?: FollowUp;
 
   lastMessage: string;
 
