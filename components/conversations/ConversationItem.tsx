@@ -10,13 +10,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { MoreVertical } from "lucide-react";
+import {
+  MoreVertical,
+  Tags,
+  UserPlus,
+  Pin,
+  Archive,
+  CalendarClock,
+} from "lucide-react";
 
 type Props = {
   conversation: Conversation;
   selected?: boolean;
+
   onClick: () => void;
+
   onAssignLabels: (conversation: Conversation) => void;
+
+  onAssignEmployee: (conversation: Conversation) => void;
+
+  onPin?: (conversation: Conversation) => void;
+
+  onArchive?: (conversation: Conversation) => void;
 };
 
 export default function ConversationItem({
@@ -24,18 +39,27 @@ export default function ConversationItem({
   selected,
   onClick,
   onAssignLabels,
+  onAssignEmployee,
+  onPin,
+  onArchive,
 }: Props) {
   const labels = conversation.labels || [];
+
+  const hasFollowUp =
+    conversation.followUp?.date && !conversation.followUp?.completed;
+
   return (
     <div
       onClick={onClick}
       className={`
-    cursor-pointer
-    border-b
-    px-3 py-2
-    hover:bg-muted
-    ${selected ? "bg-muted" : ""}
-  `}
+        cursor-pointer
+        border-b
+        px-3
+        py-2
+        hover:bg-muted
+        transition-colors
+        ${selected ? "bg-muted" : ""}
+      `}
     >
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
@@ -46,6 +70,12 @@ export default function ConversationItem({
           <div className="text-[11px] text-muted-foreground truncate">
             {conversation.contactId?.phone}
           </div>
+
+          {conversation.assignedTo && (
+            <div className="text-[10px] text-blue-600 mt-0.5 truncate">
+              Assigned: {conversation.assignedTo.name}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -64,13 +94,25 @@ export default function ConversationItem({
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onAssignLabels(conversation)}>
-                🏷️ Assign Labels
+              <DropdownMenuItem onClick={() => onAssignEmployee(conversation)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Assign Employee
               </DropdownMenuItem>
 
-              <DropdownMenuItem>📌 Pin</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAssignLabels(conversation)}>
+                <Tags className="mr-2 h-4 w-4" />
+                Assign Labels
+              </DropdownMenuItem>
 
-              <DropdownMenuItem>📁 Archive</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onPin?.(conversation)}>
+                <Pin className="mr-2 h-4 w-4" />
+                {conversation.isPinned ? "Unpin" : "Pin"}
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => onArchive?.(conversation)}>
+                <Archive className="mr-2 h-4 w-4" />
+                {conversation.isArchived ? "Unarchive" : "Archive"}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -78,14 +120,23 @@ export default function ConversationItem({
 
       <div className="truncate text-sm mt-1">{conversation.lastMessage}</div>
 
-      <div className="flex items-center justify-between mt-1">
-        <div className="text-[11px] text-muted-foreground">
-          {conversation.lastMessageAt
-            ? new Date(conversation.lastMessageAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : ""}
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center gap-1">
+          <div className="text-[11px] text-muted-foreground">
+            {conversation.lastMessageAt
+              ? new Date(conversation.lastMessageAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : ""}
+          </div>
+
+          {hasFollowUp && (
+            <Badge variant="secondary" className="h-5 text-[10px]">
+              <CalendarClock className="h-3 w-3 mr-1" />
+              Follow Up
+            </Badge>
+          )}
         </div>
 
         {labels.length > 0 && (

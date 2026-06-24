@@ -9,6 +9,7 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onAssignLabels: (conversation: Conversation) => void;
+  onAssignEmployee: (conversation: Conversation) => void;
 };
 
 export default function ConversationList({
@@ -16,6 +17,7 @@ export default function ConversationList({
   selectedId,
   onSelect,
   onAssignLabels,
+  onAssignEmployee,
 }: Props) {
   return (
     <div className="h-full">
@@ -26,6 +28,7 @@ export default function ConversationList({
           selected={selectedId === conversation._id}
           onClick={() => onSelect(conversation._id)}
           onAssignLabels={onAssignLabels}
+          onAssignEmployee={onAssignEmployee}
         />
       ))}
     </div>

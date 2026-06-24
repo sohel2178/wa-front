@@ -11,12 +11,12 @@ export default function MessageBubble({ message }: Props) {
 
   const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
-  console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
-  console.log("MEDIA URL:", message.mediaUrl);
+  // console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+  // console.log("MEDIA URL:", message.mediaUrl);
 
   const imageUrl = `${backendBaseUrl}${message.mediaUrl}`;
 
-  console.log("FINAL URL:", imageUrl);
+  // console.log("FINAL URL:", imageUrl);
 
   return (
     <div

@@ -20,6 +20,7 @@ import ManageLabelsDialog from "@/components/tags/ManageLabelsDialog";
 import { Conversation } from "@/types/conversation";
 import AssignLabelsDialog from "@/components/tags/AssignLabelsDialog";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AssignConversationDialog from "@/components/conversations/AssignConversationDialog";
 
 export default function ConversationsPage() {
   const socket = useSocket();
@@ -42,6 +43,12 @@ export default function ConversationsPage() {
   const [showCreateLabel, setShowCreateLabel] = useState(false);
 
   const [showManageLabels, setShowManageLabels] = useState(false);
+
+  const [assignEmployeeDialogOpen, setAssignEmployeeDialogOpen] =
+    useState(false);
+
+  const [assignConversation, setAssignConversation] =
+    useState<Conversation | null>(null);
 
   const [assignLabelConversation, setAssignLabelConversation] =
     useState<Conversation | null>(null);
@@ -147,6 +154,9 @@ export default function ConversationsPage() {
               onAssignLabels={(conversation) =>
                 setAssignLabelConversation(conversation)
               }
+              onAssignEmployee={(conversation) =>
+                setAssignConversation(conversation)
+              }
             />
           </div>
         </div>
@@ -183,6 +193,21 @@ export default function ConversationsPage() {
           onClose={() => setAssignLabelConversation(null)}
           onSaved={() => {
             loadConversations();
+          }}
+        />
+
+        <AssignConversationDialog
+          open={!!assignConversation}
+          onOpenChange={(open) => {
+            if (!open) {
+              setAssignConversation(null);
+            }
+          }}
+          conversationId={assignConversation?._id || ""}
+          currentAssignedTo={assignConversation?.assignedTo?._id}
+          onAssigned={() => {
+            loadConversations();
+            setAssignConversation(null);
           }}
         />
       </MainLayout>
