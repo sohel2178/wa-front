@@ -43,6 +43,7 @@ export default function ChatInput({ conversationId }: Props) {
   const [showVideoDialog, setShowVideoDialog] = useState(false);
 
   const [sendingVideo, setSendingVideo] = useState(false);
+  const [sendingImage, setSendingImage] = useState(false);
 
   const sendVideo = async (caption: string) => {
     if (!videoFile) return;
@@ -71,6 +72,35 @@ export default function ChatInput({ conversationId }: Props) {
       console.error("Video upload failed:", error);
     } finally {
       setSendingVideo(false);
+    }
+  };
+
+  const sendImage = async (caption: string) => {
+    if (!imageFile) return;
+
+    setSendingImage(true);
+
+    try {
+      const formData = new FormData();
+
+      formData.append("file", imageFile);
+
+      formData.append("conversationId", conversationId);
+
+      formData.append("caption", caption);
+
+      await api.post("/media/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setImageFile(null);
+      setShowPreview(false);
+    } catch (error) {
+      console.error("Video upload failed:", error);
+    } finally {
+      setSendingImage(false);
     }
   };
 
@@ -191,27 +221,6 @@ export default function ChatInput({ conversationId }: Props) {
     }
   };
 
-  const sendImage = async (caption: string) => {
-    if (!imageFile) return;
-
-    const formData = new FormData();
-
-    formData.append("file", imageFile);
-
-    formData.append("conversationId", conversationId);
-
-    formData.append("caption", caption);
-
-    await api.post("/media/image", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    setImageFile(null);
-    setShowPreview(false);
-  };
-
   return (
     <div className="border-t p-4">
       <div className="flex gap-2">
@@ -269,6 +278,7 @@ export default function ChatInput({ conversationId }: Props) {
 
       <ImagePreviewDialog
         file={imageFile}
+        loading={sendingImage}
         open={showPreview && !!imageFile}
         onClose={() => setShowPreview(false)}
         onSend={sendImage}

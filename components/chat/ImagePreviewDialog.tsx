@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 type Props = {
   file: File | null;
   open: boolean;
+  loading?: boolean;
   onClose: () => void;
   onSend: (caption: string) => void;
 };
@@ -13,6 +14,7 @@ export default function ImagePreviewDialog({
   file,
   open,
   onClose,
+  loading = false,
   onSend,
 }: Props) {
   const [preview, setPreview] = useState<string | null>(null);
@@ -54,8 +56,19 @@ export default function ImagePreviewDialog({
             Cancel
           </button>
 
-          <button className="border px-4 py-2" onClick={() => onSend(caption)}>
-            Send
+          <button
+            onClick={() => onSend(caption)}
+            disabled={loading}
+            className="
+                bg-green-600
+                text-white
+                rounded-md
+                px-4
+                py-2
+                disabled:opacity-50
+              "
+          >
+            {loading ? "Sending..." : "Send"}
           </button>
         </div>
       </div>

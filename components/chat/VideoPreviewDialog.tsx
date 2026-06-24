@@ -88,7 +88,7 @@ export default function VideoPreviewDialog({
         overflow-hidden
       "
                 style={{
-                  height: "320px",
+                  height: "280px",
                 }}
               >
                 <video
