@@ -1,8 +1,8 @@
 "use client";
+
 import { useEffect, useRef } from "react";
 
 import MessageBubble from "./MessageBubble";
-
 import { Message } from "@/types/message";
 
 type Props = {
@@ -15,13 +15,17 @@ export default function MessageList({ messages }: Props) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
+      block: "end",
     });
   }, [messages]);
+
   return (
-    <div ref={bottomRef} className="flex-1 overflow-y-auto p-4">
+    <div className="flex-1 overflow-y-auto p-4">
       {messages.map((message) => (
         <MessageBubble key={message._id} message={message} />
       ))}
+
+      <div ref={bottomRef} />
     </div>
   );
 }
