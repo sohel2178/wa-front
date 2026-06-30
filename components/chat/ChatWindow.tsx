@@ -13,20 +13,23 @@ import MessageList from "./MessageList";
 import { Message, MessageStatus } from "@/types/message";
 import AssignLabelsDialog from "../tags/AssignLabelsDialog";
 import { Tag } from "@/types/tag";
-import ScheduleFollowupDialog from "../followups/ScheduleFollowupDialog";
+import CreateFollowUpDialog from "../followups/CreateFollowUpDialog";
+import UpdateFollowUpDialog from "../followups/UpdateFollowUpDialog";
+
+import { updateFollowUp } from "@/lib/followup-api";
 
 type Props = {
   conversation: Conversation;
 
   tags: Tag[];
 
-  onLabelsUpdated: () => void;
+  onConversationUpdated: () => void;
 };
 
 export default function ChatWindow({
   conversation,
   tags,
-  onLabelsUpdated,
+  onConversationUpdated,
 }: Props) {
   const socket = useSocket();
 
@@ -38,7 +41,9 @@ export default function ChatWindow({
 
   const [showSearch, setShowSearch] = useState(false);
 
-  const [followupOpen, setFollowupOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   const loadMessages = useCallback(async () => {
     if (!conversation?._id) return;
@@ -111,14 +116,34 @@ export default function ChatWindow({
     };
   }, [socket]);
 
-  const addMessage = (message: Message) => {
-    setMessages((prev) => {
-      const exists = prev.some((m) => m._id === message._id);
+  const handleComplete = async () => {
+    if (!conversation.followUp) return;
 
-      if (exists) return prev;
+    try {
+      await updateFollowUp(conversation.followUp._id, {
+        status: "completed",
+      });
 
-      return [...prev, message];
-    });
+      // TODO
+      // Refresh conversation from parent
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!conversation.followUp) return;
+
+    try {
+      await updateFollowUp(conversation.followUp._id, {
+        status: "cancelled",
+      });
+
+      // TODO
+      // Refresh conversation from parent
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -127,7 +152,10 @@ export default function ChatWindow({
         conversation={conversation}
         onAssignLabels={() => setShowAssignLabels(true)}
         onSearchMessages={() => setShowSearch(true)}
-        onScheduleFollowup={() => setFollowupOpen(true)}
+        onCreateFollowUp={() => setCreateOpen(true)}
+        onUpdateFollowUp={() => setUpdateOpen(true)}
+        onCompleteFollowUp={handleComplete}
+        onCancelFollowUp={handleCancel}
       />
 
       {loading ? (
@@ -146,15 +174,29 @@ export default function ChatWindow({
         tags={tags}
         onClose={() => setShowAssignLabels(false)}
         onSaved={() => {
-          onLabelsUpdated();
+          onConversationUpdated();
         }}
       />
 
-      <ScheduleFollowupDialog
-        open={followupOpen}
-        onOpenChange={setFollowupOpen}
+      <CreateFollowUpDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
         conversationId={conversation._id}
+        onSuccess={() => {
+          onConversationUpdated();
+        }}
       />
+
+      {conversation.followUp && (
+        <UpdateFollowUpDialog
+          open={updateOpen}
+          onOpenChange={setUpdateOpen}
+          followUp={conversation.followUp}
+          onSuccess={() => {
+            onConversationUpdated();
+          }}
+        />
+      )}
     </div>
   );
 }

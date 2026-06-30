@@ -65,6 +65,21 @@ export default function ConversationsPage() {
   }, []);
 
   useEffect(() => {
+    const handler = (followUp: any) => {
+      console.log(followUp, "get from socket");
+      updateConversation(followUp.conversationId._id, {
+        followUp,
+      });
+    };
+
+    socket.on("followup_updated", handler);
+
+    return () => {
+      socket.off("followup_updated", handler);
+    };
+  }, [socket, updateConversation]);
+
+  useEffect(() => {
     const handler = (conversation: any) => {
       addConversation(conversation);
     };
@@ -135,7 +150,7 @@ export default function ConversationsPage() {
   return (
     <ProtectedRoute>
       <MainLayout>
-        <div className="w-96 border-r flex flex-col h-screen">
+        <div className="w-96 border-r flex flex-col h-screen min-h-0">
           <SearchBar value={search} onChange={setSearch} />
 
           <LabelSidebar
@@ -146,7 +161,7 @@ export default function ConversationsPage() {
             onManage={() => setShowManageLabels(true)}
           />
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <ConversationList
               conversations={filteredConversations}
               selectedId={selectedId}
@@ -165,7 +180,7 @@ export default function ConversationsPage() {
           <ChatWindow
             conversation={selectedConversation}
             tags={tags}
-            onLabelsUpdated={() => {
+            onConversationUpdated={() => {
               loadConversations();
             }}
           />

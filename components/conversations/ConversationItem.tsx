@@ -45,8 +45,66 @@ export default function ConversationItem({
 }: Props) {
   const labels = conversation.labels || [];
 
-  const hasFollowUp =
-    conversation.followUp?.date && !conversation.followUp?.completed;
+  const followUp = conversation.followUp;
+
+  const now = new Date();
+
+  const getFollowUpBadge = () => {
+    if (!followUp?.current) {
+      return null;
+    }
+
+    const { status, scheduledAt } = followUp.current;
+
+    if (status === "completed") {
+      return {
+        text: "Completed",
+        variant: "default" as const,
+      };
+    }
+
+    if (status === "cancelled") {
+      return {
+        text: "Cancelled",
+        variant: "secondary" as const,
+      };
+    }
+
+    if (!scheduledAt) {
+      return null;
+    }
+
+    const scheduled = new Date(scheduledAt);
+
+    const now = new Date();
+
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(now);
+    end.setHours(23, 59, 59, 999);
+
+    if (scheduled < now) {
+      return {
+        text: "Overdue",
+        variant: "destructive" as const,
+      };
+    }
+
+    if (scheduled >= start && scheduled <= end) {
+      return {
+        text: "Today",
+        variant: "default" as const,
+      };
+    }
+
+    return {
+      text: scheduled.toLocaleDateString(),
+      variant: "secondary" as const,
+    };
+  };
+
+  const followUpBadge = getFollowUpBadge();
 
   return (
     <div
@@ -131,10 +189,10 @@ export default function ConversationItem({
               : ""}
           </div>
 
-          {hasFollowUp && (
-            <Badge variant="secondary" className="h-5 text-[10px]">
-              <CalendarClock className="h-3 w-3 mr-1" />
-              Follow Up
+          {followUpBadge && (
+            <Badge variant={followUpBadge.variant} className="h-5 text-[10px]">
+              <CalendarClock className="mr-1 h-3 w-3" />
+              {followUpBadge.text}
             </Badge>
           )}
         </div>

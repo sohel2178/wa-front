@@ -1,6 +1,7 @@
 "use client";
 
 import { Tag } from "@/types/tag";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Props = {
   tags: Tag[];
@@ -24,10 +25,11 @@ export default function LabelSidebar({
   return (
     <div className="border-b">
       <div className="p-2">
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => onSelect(null)}
-            className={`
+        <div style={{ height: 115 }} className="overflow-y-auto">
+          <div className="grid grid-cols-3 gap-2 pr-2 auto-rows-max">
+            <button
+              onClick={() => onSelect(null)}
+              className={`
         px-3 py-2
         rounded
         text-sm
@@ -38,15 +40,15 @@ export default function LabelSidebar({
             : "hover:bg-muted border"
         }
       `}
-          >
-            All
-          </button>
+            >
+              All
+            </button>
 
-          {tags.map((tag) => (
-            <button
-              key={tag._id}
-              onClick={() => onSelect(tag._id)}
-              className={`
+            {tags.map((tag) => (
+              <button
+                key={tag._id}
+                onClick={() => onSelect(tag._id)}
+                className={`
           px-3 py-2
           rounded
           text-sm
@@ -62,17 +64,18 @@ export default function LabelSidebar({
               : "hover:bg-muted"
           }
         `}
-            >
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{
-                  backgroundColor: tag.color,
-                }}
-              />
+              >
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{
+                    backgroundColor: tag.color,
+                  }}
+                />
 
-              <span className="truncate">{tag.name}</span>
-            </button>
-          ))}
+                <span className="truncate">{tag.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -94,3 +97,24 @@ export default function LabelSidebar({
     </div>
   );
 }
+
+// export default function LabelSidebar() {
+//   return (
+//     <div className="border-b">
+//       <div
+//         style={{
+//           height: 120,
+//           overflowY: "auto",
+//           border: "2px solid red",
+//           padding: 8,
+//         }}
+//       >
+//         {Array.from({ length: 50 }).map((_, i) => (
+//           <div key={i}>Label {i}</div>
+//         ))}
+//       </div>
+
+//       <div className="border-t p-2">Footer</div>
+//     </div>
+//   );
+// }
