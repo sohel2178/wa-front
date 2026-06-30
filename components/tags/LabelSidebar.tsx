@@ -25,7 +25,7 @@ export default function LabelSidebar({
   return (
     <div className="border-b">
       <div className="p-2">
-        <div style={{ height: 115 }} className="overflow-y-auto">
+        <div style={{ height: 120 }} className="overflow-y-auto">
           <div className="grid grid-cols-3 gap-2 pr-2 auto-rows-max">
             <button
               onClick={() => onSelect(null)}
