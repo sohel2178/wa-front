@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import MainLayout from "@/components/layout/MainLayout";
-import FollowupList from "@/components/followups/FollowupList";
 
 import { Conversation } from "@/types/conversation";
 
@@ -83,26 +82,11 @@ export default function FollowupsPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="today" className="mt-4">
-                <FollowupList
-                  conversations={today}
-                  onComplete={handleComplete}
-                />
-              </TabsContent>
+              <TabsContent value="today" className="mt-4"></TabsContent>
 
-              <TabsContent value="upcoming" className="mt-4">
-                <FollowupList
-                  conversations={upcoming}
-                  onComplete={handleComplete}
-                />
-              </TabsContent>
+              <TabsContent value="upcoming" className="mt-4"></TabsContent>
 
-              <TabsContent value="overdue" className="mt-4">
-                <FollowupList
-                  conversations={overdue}
-                  onComplete={handleComplete}
-                />
-              </TabsContent>
+              <TabsContent value="overdue" className="mt-4"></TabsContent>
             </Tabs>
           </>
         )}
