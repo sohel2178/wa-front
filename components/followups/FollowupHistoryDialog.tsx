@@ -109,7 +109,7 @@ export default function FollowupHistoryDialog({
                 <div key={index} className="relative ml-6 pb-8 last:pb-0">
                   {/* Timeline Dot */}
 
-                  <div className="absolute -left-[34px] top-1 flex h-8 w-8 items-center justify-center rounded-full border bg-background">
+                  <div className="absolute -left-8.5 top-1 flex h-8 w-8 items-center justify-center rounded-full border bg-background">
                     <Icon className={`h-4 w-4 ${action.color}`} />
                   </div>
 
