@@ -1,96 +1,315 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 
-import { Conversation } from "@/types/conversation";
-
-import api from "@/lib/api";
+import FollowupHeader from "@/components/followups/FollowupHeader";
+import FollowupStats from "@/components/followups/FollowupStats";
+import FollowupFilters from "@/components/followups/FollowupFilters";
+import FollowupList from "@/components/followups/FollowupList";
+import UpdateFollowUpDialog from "@/components/followups/UpdateFollowUpDialog";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+
+import {
+  getTodaysFollowUps,
+  getUpcomingFollowUps,
+  getOverdueFollowUps,
+  updateFollowUp,
+  getCompletedFollowUps,
+} from "@/lib/followup-api";
+
+import { FollowUp } from "@/types/followup";
+import { Badge } from "@/components/ui/badge";
 
 export default function FollowupsPage() {
-  const [today, setToday] = useState<Conversation[]>([]);
-  const [upcoming, setUpcoming] = useState<Conversation[]>([]);
-  const [overdue, setOverdue] = useState<Conversation[]>([]);
-
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const [today, setToday] = useState<FollowUp[]>([]);
+  const [upcoming, setUpcoming] = useState<FollowUp[]>([]);
+  const [overdue, setOverdue] = useState<FollowUp[]>([]);
+  const [completed, setCompleted] = useState<FollowUp[]>([]);
+
+  const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(
+    null,
+  );
+
+  const [updateOpen, setUpdateOpen] = useState(false);
+
+  // Filters
+
+  const [search, setSearch] = useState("");
+
+  const [employee, setEmployee] = useState("all");
+
+  const [district, setDistrict] = useState("all");
+
+  const [status, setStatus] = useState("all");
+
+  const load = async () => {
     try {
       setLoading(true);
 
-      const [todayRes, upcomingRes, overdueRes] = await Promise.all([
-        api.get("/followups/today"),
-        api.get("/followups/upcoming"),
-        api.get("/followups/overdue"),
-      ]);
+      const [todayData, upcomingData, overdueData, completedData] =
+        await Promise.all([
+          getTodaysFollowUps(),
+          getUpcomingFollowUps(),
+          getOverdueFollowUps(),
+          getCompletedFollowUps(),
+        ]);
 
-      setToday(todayRes.data);
-      setUpcoming(upcomingRes.data);
-      setOverdue(overdueRes.data);
-    } catch (error) {
-      console.error("Failed to load followups", error);
+      setToday(todayData);
+
+      setUpcoming(upcomingData);
+
+      setOverdue(overdueData);
+
+      setCompleted(completedData);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleComplete = async (conversationId: string) => {
-    try {
-      await api.patch(`/conversations/${conversationId}/followup/complete`);
+  useEffect(() => {
+    load();
+  }, []);
 
-      await loadData();
-    } catch (error) {
-      console.error("Failed to complete follow-up", error);
+  const handleEdit = (followUp: FollowUp) => {
+    setSelectedFollowUp(followUp);
+    setUpdateOpen(true);
+  };
+
+  const handleComplete = async (followUp: FollowUp) => {
+    try {
+      await updateFollowUp(followUp._id, {
+        status: "completed",
+      });
+
+      load();
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const handleCancel = async (followUp: FollowUp) => {
+    try {
+      await updateFollowUp(followUp._id, {
+        status: "cancelled",
+      });
+
+      load();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filterFollowUps = (items: FollowUp[]) => {
+    return items.filter((followUp) => {
+      const conversation = followUp.conversationId;
+
+      const contact = conversation.contactId;
+
+      const matchesSearch =
+        !search ||
+        contact?.name?.toLowerCase().includes(search.toLowerCase()) ||
+        contact?.phone?.includes(search);
+
+      const matchesEmployee =
+        employee === "all" || conversation.assignedTo?._id === employee;
+
+      const matchesDistrict =
+        district === "all" || followUp.salesSnapshot.district === district;
+
+      const matchesStatus =
+        status === "all" || followUp.current.status === status;
+
+      return (
+        matchesSearch && matchesEmployee && matchesDistrict && matchesStatus
+      );
+    });
+  };
+
+  const todayData = useMemo(
+    () => filterFollowUps(today),
+    [today, search, employee, district, status],
+  );
+
+  const upcomingData = useMemo(
+    () => filterFollowUps(upcoming),
+    [upcoming, search, employee, district, status],
+  );
+
+  const overdueData = useMemo(
+    () => filterFollowUps(overdue),
+    [overdue, search, employee, district, status],
+  );
 
   return (
-    <MainLayout>
-      <div className="h-full p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Follow Ups</h1>
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="flex h-screen flex-1 flex-col">
+          <FollowupHeader loading={loading} onRefresh={load} />
 
-          <p className="text-muted-foreground">
-            Manage scheduled customer follow-ups
-          </p>
-        </div>
+          <FollowupStats
+            today={today.length}
+            upcoming={upcoming.length}
+            overdue={overdue.length}
+            completed={completed.length}
+          />
 
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            Loading...
-          </div>
-        ) : (
-          <>
-            <Tabs defaultValue="today">
+          <FollowupFilters
+            search={search}
+            onSearchChange={setSearch}
+            employee={employee}
+            onEmployeeChange={setEmployee}
+            district={district}
+            onDistrictChange={setDistrict}
+            status={status}
+            onStatusChange={setStatus}
+            employees={[]}
+            districts={[]}
+            loading={loading}
+            onRefresh={load}
+            onClear={() => {
+              setSearch("");
+              setEmployee("all");
+              setDistrict("all");
+              setStatus("all");
+            }}
+          />
+
+          <Tabs defaultValue="today" className="flex min-h-0 flex-1 flex-col">
+            {/* <div className="border-b bg-background px-6 py-3">
               <TabsList>
-                <TabsTrigger value="today">Today ({today.length})</TabsTrigger>
+                <TabsTrigger value="today">
+                  Today ({todayData.length})
+                </TabsTrigger>
 
                 <TabsTrigger value="upcoming">
-                  Upcoming ({upcoming.length})
+                  Upcoming ({upcomingData.length})
                 </TabsTrigger>
 
                 <TabsTrigger value="overdue">
-                  Overdue ({overdue.length})
+                  Overdue ({overdueData.length})
                 </TabsTrigger>
               </TabsList>
+            </div> */}
 
-              <TabsContent value="today" className="mt-4"></TabsContent>
+            <div className="border-b bg-background px-6 py-3">
+              <TabsList className="h-11 rounded-lg bg-muted p-1">
+                <TabsTrigger
+                  value="today"
+                  className="rounded-md px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  Today
+                  <Badge variant="secondary" className="ml-2">
+                    {todayData.length}
+                  </Badge>
+                </TabsTrigger>
 
-              <TabsContent value="upcoming" className="mt-4"></TabsContent>
+                <TabsTrigger
+                  value="upcoming"
+                  className="rounded-md px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  Upcoming
+                  <Badge variant="secondary" className="ml-2">
+                    {upcomingData.length}
+                  </Badge>
+                </TabsTrigger>
 
-              <TabsContent value="overdue" className="mt-4"></TabsContent>
-            </Tabs>
-          </>
+                <TabsTrigger
+                  value="overdue"
+                  className="rounded-md px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  Overdue
+                  <Badge variant="destructive" className="ml-2">
+                    {overdueData.length}
+                  </Badge>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="completed"
+                  className="rounded-md px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  Completed
+                  <Badge className="ml-2 bg-green-600 hover:bg-green-600">
+                    {completed.length}
+                  </Badge>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="today" className="min-h-0 flex-1 overflow-auto">
+              <FollowupList
+                loading={loading}
+                followUps={todayData}
+                onRefresh={load}
+                onEdit={handleEdit}
+                onComplete={handleComplete}
+                onCancel={handleCancel}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="upcoming"
+              className="min-h-0 flex-1 overflow-auto"
+            >
+              <FollowupList
+                loading={loading}
+                followUps={upcomingData}
+                onRefresh={load}
+                onEdit={handleEdit}
+                onComplete={handleComplete}
+                onCancel={handleCancel}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="overdue"
+              className="min-h-0 flex-1 overflow-auto"
+            >
+              <FollowupList
+                loading={loading}
+                followUps={overdueData}
+                onRefresh={load}
+                onEdit={handleEdit}
+                onComplete={handleComplete}
+                onCancel={handleCancel}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="completed"
+              className="min-h-0 flex-1 overflow-auto"
+            >
+              <FollowupList
+                loading={loading}
+                followUps={completed}
+                onRefresh={load}
+                onEdit={handleEdit}
+                onComplete={handleComplete}
+                onCancel={handleCancel}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {selectedFollowUp && (
+          <UpdateFollowUpDialog
+            open={updateOpen}
+            onOpenChange={setUpdateOpen}
+            followUp={selectedFollowUp}
+            onSuccess={() => {
+              setUpdateOpen(false);
+              load();
+            }}
+          />
         )}
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </ProtectedRoute>
   );
 }

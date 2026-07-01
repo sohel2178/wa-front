@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import api from "@/lib/api";
 import useSocket from "@/hooks/useSocket";
@@ -32,6 +33,10 @@ export default function ConversationsPage() {
     clearUnread,
     addConversation,
   } = useChatStore();
+
+  const searchParams = useSearchParams();
+
+  const conversationId = searchParams.get("id");
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -65,8 +70,13 @@ export default function ConversationsPage() {
   }, []);
 
   useEffect(() => {
+    if (conversationId) {
+      setSelectedId(conversationId);
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
     const handler = (followUp: any) => {
-      console.log(followUp, "get from socket");
       updateConversation(followUp.conversationId._id, {
         followUp,
       });

@@ -76,6 +76,12 @@ export const getOverdueFollowUps = async (): Promise<FollowUp[]> => {
   return res.data.followUps;
 };
 
+export const getCompletedFollowUps = async (): Promise<FollowUp[]> => {
+  const res = await api.get("/followups/completed");
+
+  return res.data.followUps;
+};
+
 /**
  * Employee Schedule
  */

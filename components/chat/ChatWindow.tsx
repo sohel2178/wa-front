@@ -68,6 +68,9 @@ export default function ChatWindow({
   useEffect(() => {
     if (!conversation?._id) return;
 
+    console.log("Socket connected:", socket.connected);
+    console.log("Joining:", conversation._id);
+
     socket.emit("conversation:join", conversation._id);
 
     return () => {
