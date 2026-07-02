@@ -1,8 +1,9 @@
 import { Conversation } from "./conversation";
 import { User } from "./user";
+import { BangladeshDistrict } from "@/lib/bangladesh-districts";
 
 export interface SalesSnapshot {
-  district: string;
+  district?: BangladeshDistrict | "";
   address: string;
   devicePrice: number | null;
   monthlyCharge: number | null;

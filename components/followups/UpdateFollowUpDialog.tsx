@@ -15,6 +15,7 @@ import FollowUpForm, { FollowUpFormData } from "./FollowUpForm";
 
 import { FollowUp } from "@/types/followup";
 import { updateFollowUp } from "@/lib/followup-api";
+import { BangladeshDistrict } from "@/lib/bangladesh-districts";
 
 type Props = {
   open: boolean;
@@ -60,7 +61,7 @@ export default function UpdateFollowUpDialog({
 
       note: followUp.current.note || "",
 
-      district: followUp.salesSnapshot.district || "",
+      district: (followUp.salesSnapshot.district as BangladeshDistrict) || "",
 
       address: followUp.salesSnapshot.address || "",
 

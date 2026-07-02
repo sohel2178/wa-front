@@ -70,7 +70,7 @@ export default function EmployeeSelect({
           role="combobox"
           disabled={disabled}
           aria-expanded={open}
-          className={cn("w-[220px] justify-between", className)}
+          className={cn("w-55 justify-between", className)}
         >
           <div className="flex items-center gap-2 overflow-hidden">
             <User className="h-4 w-4 shrink-0 text-muted-foreground" />
