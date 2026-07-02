@@ -39,7 +39,7 @@ export default function FollowupList({
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-6">
+    <div className="mx-auto w-full ">
       <motion.div
         layout
         className="grid gap-4 p-4 sm:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"

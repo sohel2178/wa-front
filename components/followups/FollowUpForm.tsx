@@ -1,13 +1,24 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  BANGLADESH_DISTRICTS,
+  BangladeshDistrict,
+} from "@/lib/bangladesh-districts";
 
 export interface FollowUpFormData {
   date: string;
   time: string;
   note: string;
 
-  district: string;
+  district: BangladeshDistrict | "";
   address: string;
 
   devicePrice: string;
@@ -71,10 +82,27 @@ export default function FollowUpForm({ value, onChange }: Props) {
           <div>
             <label className="text-sm font-medium">District</label>
 
-            <Input
+            <Select
               value={value.district}
-              onChange={(e) => update("district", e.target.value)}
-            />
+              onValueChange={(district) =>
+                onChange({
+                  ...value,
+                  district: district as BangladeshDistrict,
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select District" />
+              </SelectTrigger>
+
+              <SelectContent className="max-h-80">
+                {BANGLADESH_DISTRICTS.map((district) => (
+                  <SelectItem key={district} value={district}>
+                    {district}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

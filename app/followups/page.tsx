@@ -12,6 +12,7 @@ import FollowupList from "@/components/followups/FollowupList";
 import UpdateFollowUpDialog from "@/components/followups/UpdateFollowUpDialog";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthStore } from "@/store/authStore";
 
 import {
   getTodaysFollowUps,
@@ -21,8 +22,11 @@ import {
   getCompletedFollowUps,
 } from "@/lib/followup-api";
 
+import api from "@/lib/api";
+
 import { FollowUp } from "@/types/followup";
 import { Badge } from "@/components/ui/badge";
+import { User } from "@/types/user";
 
 export default function FollowupsPage() {
   const [loading, setLoading] = useState(true);
@@ -31,6 +35,9 @@ export default function FollowupsPage() {
   const [upcoming, setUpcoming] = useState<FollowUp[]>([]);
   const [overdue, setOverdue] = useState<FollowUp[]>([]);
   const [completed, setCompleted] = useState<FollowUp[]>([]);
+  const [employees, setEmployees] = useState<User[]>([]);
+
+  const { user } = useAuthStore();
 
   const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(
     null,
@@ -77,6 +84,26 @@ export default function FollowupsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  const loadEmployees = async () => {
+    try {
+      const res = await api.get("/users");
+
+      console.log("Employees:", res.data);
+
+      setEmployees(res.data.filter((user: User) => user.role === "employee"));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.role !== "admin") return;
+
+    loadEmployees();
+  }, [user]);
 
   const handleEdit = (followUp: FollowUp) => {
     setSelectedFollowUp(followUp);
@@ -152,7 +179,42 @@ export default function FollowupsPage() {
     <ProtectedRoute>
       <MainLayout>
         <div className="flex h-screen flex-1 flex-col">
-          <FollowupHeader loading={loading} onRefresh={load} />
+          {/* <FollowupHeader loading={loading} onRefresh={load} /> */}
+
+          <FollowupHeader loading={loading} onRefresh={load}>
+            {/* <FollowupFilters
+              search={search}
+              onSearchChange={setSearch}
+              employee={employee}
+              onEmployeeChange={setEmployee}
+              district={district}
+              onDistrictChange={setDistrict}
+              status={status}
+              onStatusChange={setStatus}
+              employees={employees}
+              isAdmin={user?.role === "admin"}
+            /> */}
+
+            <FollowupFilters
+              search={search}
+              onSearchChange={setSearch}
+              employee={employee}
+              onEmployeeChange={setEmployee}
+              district={district}
+              onDistrictChange={setDistrict}
+              status={status}
+              onStatusChange={setStatus}
+              employees={employees}
+              loading={loading}
+              isAdmin={user?.role === "admin"}
+              onClear={() => {
+                setSearch("");
+                setEmployee("all");
+                setDistrict("all");
+                setStatus("all");
+              }}
+            />
+          </FollowupHeader>
 
           <FollowupStats
             today={today.length}
@@ -161,44 +223,7 @@ export default function FollowupsPage() {
             completed={completed.length}
           />
 
-          <FollowupFilters
-            search={search}
-            onSearchChange={setSearch}
-            employee={employee}
-            onEmployeeChange={setEmployee}
-            district={district}
-            onDistrictChange={setDistrict}
-            status={status}
-            onStatusChange={setStatus}
-            employees={[]}
-            districts={[]}
-            loading={loading}
-            onRefresh={load}
-            onClear={() => {
-              setSearch("");
-              setEmployee("all");
-              setDistrict("all");
-              setStatus("all");
-            }}
-          />
-
           <Tabs defaultValue="today" className="flex min-h-0 flex-1 flex-col">
-            {/* <div className="border-b bg-background px-6 py-3">
-              <TabsList>
-                <TabsTrigger value="today">
-                  Today ({todayData.length})
-                </TabsTrigger>
-
-                <TabsTrigger value="upcoming">
-                  Upcoming ({upcomingData.length})
-                </TabsTrigger>
-
-                <TabsTrigger value="overdue">
-                  Overdue ({overdueData.length})
-                </TabsTrigger>
-              </TabsList>
-            </div> */}
-
             <div className="border-b bg-background px-6 py-3">
               <TabsList className="h-11 rounded-lg bg-muted p-1">
                 <TabsTrigger

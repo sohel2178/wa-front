@@ -2,8 +2,6 @@
 
 import { motion } from "framer-motion";
 
-import { Card, CardContent } from "@/components/ui/card";
-
 import {
   CalendarDays,
   Clock3,
@@ -18,89 +16,87 @@ type Props = {
   completed: number;
 };
 
-const stats = (
-  today: number,
-  upcoming: number,
-  overdue: number,
-  completed: number,
-) => [
-  {
-    title: "Today",
-    value: today,
-    icon: CalendarDays,
-    color: "text-blue-600",
-    bg: "bg-blue-500/10",
-    description: "Need attention today",
-  },
-  {
-    title: "Upcoming",
-    value: upcoming,
-    icon: Clock3,
-    color: "text-amber-600",
-    bg: "bg-amber-500/10",
-    description: "Scheduled later",
-  },
-  {
-    title: "Overdue",
-    value: overdue,
-    icon: AlertTriangle,
-    color: "text-red-600",
-    bg: "bg-red-500/10",
-    description: "Immediate action",
-  },
-  {
-    title: "Completed",
-    value: completed,
-    icon: CheckCircle2,
-    color: "text-green-600",
-    bg: "bg-green-500/10",
-    description: "Finished today",
-  },
-];
+export default function FollowupStats({
+  today,
+  upcoming,
+  overdue,
+  completed,
+}: Props) {
+  const stats = [
+    {
+      label: "Today",
+      value: today,
+      icon: CalendarDays,
+      iconClass: "text-blue-600",
+      bg: "bg-blue-100 dark:bg-blue-950/40",
+      border: "border-blue-200 dark:border-blue-900",
+    },
+    {
+      label: "Upcoming",
+      value: upcoming,
+      icon: Clock3,
+      iconClass: "text-amber-600",
+      bg: "bg-amber-100 dark:bg-amber-950/40",
+      border: "border-amber-200 dark:border-amber-900",
+    },
+    {
+      label: "Overdue",
+      value: overdue,
+      icon: AlertTriangle,
+      iconClass: "text-red-600",
+      bg: "bg-red-100 dark:bg-red-950/40",
+      border: "border-red-200 dark:border-red-900",
+    },
+    {
+      label: "Completed",
+      value: completed,
+      icon: CheckCircle2,
+      iconClass: "text-green-600",
+      bg: "bg-green-100 dark:bg-green-950/40",
+      border: "border-green-200 dark:border-green-900",
+    },
+  ];
 
-export default function FollowupStats(props: Props) {
   return (
-    <div className="grid gap-4 px-6 py-6 sm:grid-cols-2 xl:grid-cols-4">
-      {stats(props.today, props.upcoming, props.overdue, props.completed).map(
-        (item) => {
+    <div className="border-b bg-muted/20">
+      <div className="flex gap-3 overflow-x-auto px-6 py-3 scrollbar-none">
+        {stats.map((item) => {
           const Icon = item.icon;
 
           return (
             <motion.div
-              key={item.title}
-              whileHover={{
-                y: -3,
-                scale: 1.02,
-              }}
-              transition={{
-                duration: 0.15,
-              }}
+              key={item.label}
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.15 }}
+              className={`
+                flex min-w-fit items-center gap-3 rounded-xl border
+                px-4 py-3
+                ${item.bg}
+                ${item.border}
+              `}
             >
-              <Card className="shadow-sm transition-shadow hover:shadow-lg">
-                <CardContent className="flex items-center justify-between p-5">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {item.title}
-                    </p>
+              <div
+                className={`
+                  flex h-10 w-10 items-center justify-center
+                  rounded-lg bg-background shadow-sm
+                `}
+              >
+                <Icon className={`h-5 w-5 ${item.iconClass}`} />
+              </div>
 
-                    <h2 className="mt-2 text-3xl font-bold">{item.value}</h2>
+              <div>
+                <div className="text-xs text-muted-foreground">
+                  {item.label}
+                </div>
 
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  <div
-                    className={`flex h-14 w-14 items-center justify-center rounded-xl ${item.bg}`}
-                  >
-                    <Icon className={`h-7 w-7 ${item.color}`} />
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="text-xl font-bold leading-none">
+                  {item.value}
+                </div>
+              </div>
             </motion.div>
           );
-        },
-      )}
+        })}
+      </div>
     </div>
   );
 }

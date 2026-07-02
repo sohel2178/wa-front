@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
+import EmployeeSelect from "../common/EmployeeSelect";
 
 interface Campaign {
   _id: string;
@@ -89,19 +90,14 @@ export default function AssignmentDialog({
             ))}
           </select>
 
-          <select
-            value={assignedTo}
-            onChange={(e) => setAssignedTo(e.target.value)}
-            className="w-full border rounded-md p-2"
-          >
-            <option value="">Select Employee</option>
-
-            {employees.map((employee) => (
-              <option key={employee._id} value={employee._id}>
-                {employee.name}
-              </option>
-            ))}
-          </select>
+          <EmployeeSelect
+            value={assignedTo || ""}
+            onChange={setAssignedTo}
+            employees={employees}
+            includeAll={false}
+            placeholder="Select Employee"
+            className="w-full"
+          />
 
           <Button
             className="w-full"

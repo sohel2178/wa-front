@@ -4,6 +4,8 @@ import { Search, RotateCw, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BANGLADESH_DISTRICTS } from "@/lib/bangladesh-districts";
+import EmployeeSelect from "@/components/common/EmployeeSelect";
 
 import {
   Select,
@@ -22,6 +24,8 @@ type Props = {
   search: string;
   onSearchChange: (value: string) => void;
 
+  isAdmin?: boolean;
+
   employee?: string;
   onEmployeeChange?: (value: string) => void;
 
@@ -32,17 +36,15 @@ type Props = {
   onStatusChange?: (value: string) => void;
 
   employees?: Employee[];
-  districts?: string[];
 
   loading?: boolean;
-
-  onRefresh?: () => void;
   onClear?: () => void;
 };
 
 export default function FollowupFilters({
   search,
   onSearchChange,
+  isAdmin = false,
 
   employee = "all",
   onEmployeeChange,
@@ -54,15 +56,12 @@ export default function FollowupFilters({
   onStatusChange,
 
   employees = [],
-  districts = [],
 
   loading = false,
-
-  onRefresh,
   onClear,
 }: Props) {
   return (
-    <div className="border-b bg-background px-6 py-4">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         {/* Search */}
 
@@ -79,21 +78,14 @@ export default function FollowupFilters({
 
         {/* Employee */}
 
-        <Select value={employee} onValueChange={onEmployeeChange}>
-          <SelectTrigger className="w-full xl:w-48">
-            <SelectValue placeholder="Employee" />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="all">All Employees</SelectItem>
-
-            {employees.map((employee) => (
-              <SelectItem key={employee._id} value={employee._id}>
-                {employee.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isAdmin && (
+          <EmployeeSelect
+            value={employee}
+            onChange={onEmployeeChange!}
+            employees={employees}
+            includeAll
+          />
+        )}
 
         {/* District */}
 
@@ -102,10 +94,10 @@ export default function FollowupFilters({
             <SelectValue placeholder="District" />
           </SelectTrigger>
 
-          <SelectContent>
+          <SelectContent className="max-h-80">
             <SelectItem value="all">All Districts</SelectItem>
 
-            {districts.map((district) => (
+            {BANGLADESH_DISTRICTS.map((district) => (
               <SelectItem key={district} value={district}>
                 {district}
               </SelectItem>
@@ -139,13 +131,6 @@ export default function FollowupFilters({
           <Button variant="outline" onClick={onClear}>
             <X className="mr-2 h-4 w-4" />
             Clear
-          </Button>
-
-          <Button variant="outline" disabled={loading} onClick={onRefresh}>
-            <RotateCw
-              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
-            />
-            Refresh
           </Button>
         </div>
       </div>
