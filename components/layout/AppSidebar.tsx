@@ -9,6 +9,7 @@ import {
   User,
   UserCheck,
   CalendarDays,
+  Megaphone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -41,6 +42,12 @@ export default function AppSidebar() {
       {user?.role === "admin" && (
         <Link href="/campaign-assignments">
           <UserCheck className="h-6 w-6" />
+        </Link>
+      )}
+
+      {user?.role === "admin" && (
+        <Link href="/whatsapp-template-marketing">
+          <Megaphone className="h-6 w-6" />
         </Link>
       )}
 
