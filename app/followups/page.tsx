@@ -8,7 +8,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import FollowupHeader from "@/components/followups/FollowupHeader";
 import FollowupStats from "@/components/followups/FollowupStats";
 import FollowupFilters from "@/components/followups/FollowupFilters";
-import FollowupList from "@/components/followups/FollowupList";
+import FollowupTable from "@/components/followups/table/FollowupTable";
 import UpdateFollowUpDialog from "@/components/followups/UpdateFollowUpDialog";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -269,7 +269,7 @@ export default function FollowupsPage() {
             </div>
 
             <TabsContent value="today" className="min-h-0 flex-1 overflow-auto">
-              <FollowupList
+              <FollowupTable
                 loading={loading}
                 followUps={todayData}
                 onRefresh={load}
@@ -283,7 +283,7 @@ export default function FollowupsPage() {
               value="upcoming"
               className="min-h-0 flex-1 overflow-auto"
             >
-              <FollowupList
+              <FollowupTable
                 loading={loading}
                 followUps={upcomingData}
                 onRefresh={load}
@@ -297,7 +297,7 @@ export default function FollowupsPage() {
               value="overdue"
               className="min-h-0 flex-1 overflow-auto"
             >
-              <FollowupList
+              <FollowupTable
                 loading={loading}
                 followUps={overdueData}
                 onRefresh={load}
@@ -311,7 +311,7 @@ export default function FollowupsPage() {
               value="completed"
               className="min-h-0 flex-1 overflow-auto"
             >
-              <FollowupList
+              <FollowupTable
                 loading={loading}
                 followUps={completed}
                 onRefresh={load}
