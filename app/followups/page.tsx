@@ -27,6 +27,7 @@ import api from "@/lib/api";
 import { FollowUp } from "@/types/followup";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/user";
+import { isSameDay } from "date-fns";
 
 export default function FollowupsPage() {
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,8 @@ export default function FollowupsPage() {
   const [overdue, setOverdue] = useState<FollowUp[]>([]);
   const [completed, setCompleted] = useState<FollowUp[]>([]);
   const [employees, setEmployees] = useState<User[]>([]);
+
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
 
   const { user } = useAuthStore();
 
@@ -140,6 +143,10 @@ export default function FollowupsPage() {
 
       const contact = conversation.contactId;
 
+      const matchesDate =
+        !scheduledDate ||
+        isSameDay(new Date(followUp.current.scheduledAt), scheduledDate);
+
       const matchesSearch =
         !search ||
         contact?.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -155,24 +162,33 @@ export default function FollowupsPage() {
         status === "all" || followUp.current.status === status;
 
       return (
-        matchesSearch && matchesEmployee && matchesDistrict && matchesStatus
+        matchesSearch &&
+        matchesEmployee &&
+        matchesDistrict &&
+        matchesStatus &&
+        matchesDate
       );
     });
   };
 
   const todayData = useMemo(
     () => filterFollowUps(today),
-    [today, search, employee, district, status],
+    [today, search, employee, district, status, scheduledDate],
   );
 
   const upcomingData = useMemo(
     () => filterFollowUps(upcoming),
-    [upcoming, search, employee, district, status],
+    [upcoming, search, employee, district, status, scheduledDate],
   );
 
   const overdueData = useMemo(
     () => filterFollowUps(overdue),
-    [overdue, search, employee, district, status],
+    [overdue, search, employee, district, status, scheduledDate],
+  );
+
+  const completedData = useMemo(
+    () => filterFollowUps(completed),
+    [completed, search, employee, district, status, scheduledDate],
   );
 
   return (
@@ -212,7 +228,10 @@ export default function FollowupsPage() {
                 setEmployee("all");
                 setDistrict("all");
                 setStatus("all");
+                setScheduledDate(undefined);
               }}
+              scheduledDate={scheduledDate}
+              onScheduledDateChange={setScheduledDate}
             />
           </FollowupHeader>
 
@@ -262,7 +281,7 @@ export default function FollowupsPage() {
                 >
                   Completed
                   <Badge className="ml-2 bg-green-600 hover:bg-green-600">
-                    {completed.length}
+                    {completedData.length}
                   </Badge>
                 </TabsTrigger>
               </TabsList>
@@ -313,7 +332,7 @@ export default function FollowupsPage() {
             >
               <FollowupTable
                 loading={loading}
-                followUps={completed}
+                followUps={completedData}
                 onRefresh={load}
                 onEdit={handleEdit}
                 onComplete={handleComplete}

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import DatePicker from "../common/DatePicker";
 
 type Employee = {
   _id: string;
@@ -39,6 +40,9 @@ type Props = {
 
   loading?: boolean;
   onClear?: () => void;
+
+  scheduledDate?: Date;
+  onScheduledDateChange: (date: Date | undefined) => void;
 };
 
 export default function FollowupFilters({
@@ -59,6 +63,8 @@ export default function FollowupFilters({
 
   loading = false,
   onClear,
+  onScheduledDateChange,
+  scheduledDate,
 }: Props) {
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -128,6 +134,7 @@ export default function FollowupFilters({
         {/* Buttons */}
 
         <div className="flex gap-2">
+          <DatePicker value={scheduledDate} onChange={onScheduledDateChange} />
           <Button variant="outline" onClick={onClear}>
             <X className="mr-2 h-4 w-4" />
             Clear
