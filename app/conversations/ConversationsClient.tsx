@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import api from "@/lib/api";
@@ -29,6 +29,7 @@ export default function ConversationsPage() {
   const {
     conversations,
     setConversations,
+    appendConversations,
     updateConversation,
     clearUnread,
     addConversation,
@@ -37,6 +38,8 @@ export default function ConversationsPage() {
   const searchParams = useSearchParams();
 
   const conversationId = searchParams.get("id");
+
+  const listRef = useRef<HTMLDivElement>(null);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -48,6 +51,25 @@ export default function ConversationsPage() {
   const [showCreateLabel, setShowCreateLabel] = useState(false);
 
   const [showManageLabels, setShowManageLabels] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const handleScroll = () => {
+    const el = listRef.current;
+
+    if (!el) return;
+
+    const threshold = 200;
+
+    const reachedBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+
+    if (reachedBottom && hasMore && !loadingMore) {
+      loadMoreConversations();
+    }
+  };
 
   const [assignEmployeeDialogOpen, setAssignEmployeeDialogOpen] =
     useState(false);
@@ -65,7 +87,7 @@ export default function ConversationsPage() {
   };
 
   useEffect(() => {
-    loadConversations();
+    loadConversations(1, true);
     loadTags();
   }, []);
 
@@ -113,13 +135,37 @@ export default function ConversationsPage() {
     };
   }, [socket, updateConversation]);
 
-  const loadConversations = async () => {
-    try {
-      const { data } = await api.get("/conversations");
+  const loadMoreConversations = () => {
+    if (loadingMore || !hasMore) return;
 
-      setConversations(data.conversations);
+    loadConversations(page + 1);
+  };
+
+  const loadConversations = async (pageNumber = 1, replace = false) => {
+    try {
+      if (pageNumber > 1) {
+        setLoadingMore(true);
+      }
+
+      const { data } = await api.get("/conversations", {
+        params: {
+          page: pageNumber,
+          limit: 100,
+        },
+      });
+
+      if (replace) {
+        setConversations(data.conversations);
+      } else {
+        appendConversations(data.conversations);
+      }
+
+      setPage(pageNumber);
+      setHasMore(data.hasMore);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -171,7 +217,11 @@ export default function ConversationsPage() {
             onManage={() => setShowManageLabels(true)}
           />
 
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div
+            ref={listRef}
+            className="flex-1 min-h-0 overflow-y-auto"
+            onScroll={handleScroll}
+          >
             <ConversationList
               conversations={filteredConversations}
               selectedId={selectedId}
@@ -182,6 +232,7 @@ export default function ConversationsPage() {
               onAssignEmployee={(conversation) =>
                 setAssignConversation(conversation)
               }
+              loadingMore={loadingMore}
             />
           </div>
         </div>
