@@ -20,6 +20,7 @@ import {
   getOverdueFollowUps,
   updateFollowUp,
   getCompletedFollowUps,
+  getCancelledFollowUps,
 } from "@/lib/followup-api";
 
 import api from "@/lib/api";
@@ -36,6 +37,7 @@ export default function FollowupsPage() {
   const [upcoming, setUpcoming] = useState<FollowUp[]>([]);
   const [overdue, setOverdue] = useState<FollowUp[]>([]);
   const [completed, setCompleted] = useState<FollowUp[]>([]);
+  const [cancelled, setCancelled] = useState<FollowUp[]>([]);
   const [employees, setEmployees] = useState<User[]>([]);
 
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
@@ -62,13 +64,19 @@ export default function FollowupsPage() {
     try {
       setLoading(true);
 
-      const [todayData, upcomingData, overdueData, completedData] =
-        await Promise.all([
-          getTodaysFollowUps(),
-          getUpcomingFollowUps(),
-          getOverdueFollowUps(),
-          getCompletedFollowUps(),
-        ]);
+      const [
+        todayData,
+        upcomingData,
+        overdueData,
+        completedData,
+        cancelledData,
+      ] = await Promise.all([
+        getTodaysFollowUps(),
+        getUpcomingFollowUps(),
+        getOverdueFollowUps(),
+        getCompletedFollowUps(),
+        getCancelledFollowUps(),
+      ]);
 
       setToday(todayData);
 
@@ -77,6 +85,7 @@ export default function FollowupsPage() {
       setOverdue(overdueData);
 
       setCompleted(completedData);
+      setCancelled(cancelledData);
     } catch (err) {
       console.error(err);
     } finally {
@@ -191,6 +200,11 @@ export default function FollowupsPage() {
     [completed, search, employee, district, status, scheduledDate],
   );
 
+  const cancelledData = useMemo(
+    () => filterFollowUps(cancelled),
+    [cancelled, search, employee, district, status, scheduledDate],
+  );
+
   return (
     <ProtectedRoute>
       <MainLayout>
@@ -198,19 +212,6 @@ export default function FollowupsPage() {
           {/* <FollowupHeader loading={loading} onRefresh={load} /> */}
 
           <FollowupHeader loading={loading} onRefresh={load}>
-            {/* <FollowupFilters
-              search={search}
-              onSearchChange={setSearch}
-              employee={employee}
-              onEmployeeChange={setEmployee}
-              district={district}
-              onDistrictChange={setDistrict}
-              status={status}
-              onStatusChange={setStatus}
-              employees={employees}
-              isAdmin={user?.role === "admin"}
-            /> */}
-
             <FollowupFilters
               search={search}
               onSearchChange={setSearch}
@@ -240,6 +241,7 @@ export default function FollowupsPage() {
             upcoming={upcoming.length}
             overdue={overdue.length}
             completed={completed.length}
+            cancelled={cancelled.length}
           />
 
           <Tabs defaultValue="today" className="flex min-h-0 flex-1 flex-col">
@@ -282,6 +284,16 @@ export default function FollowupsPage() {
                   Completed
                   <Badge className="ml-2 bg-green-600 hover:bg-green-600">
                     {completedData.length}
+                  </Badge>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="cancelled"
+                  className="rounded-md px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  Cancelled
+                  <Badge variant="outline" className="ml-2">
+                    {cancelledData.length}
                   </Badge>
                 </TabsTrigger>
               </TabsList>
@@ -333,6 +345,20 @@ export default function FollowupsPage() {
               <FollowupTable
                 loading={loading}
                 followUps={completedData}
+                onRefresh={load}
+                onEdit={handleEdit}
+                onComplete={handleComplete}
+                onCancel={handleCancel}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="cancelled"
+              className="min-h-0 flex-1 overflow-auto"
+            >
+              <FollowupTable
+                loading={loading}
+                followUps={cancelledData}
                 onRefresh={load}
                 onEdit={handleEdit}
                 onComplete={handleComplete}

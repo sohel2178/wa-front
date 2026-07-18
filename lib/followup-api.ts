@@ -82,6 +82,12 @@ export const getCompletedFollowUps = async (): Promise<FollowUp[]> => {
   return res.data.followUps;
 };
 
+export const getCancelledFollowUps = async (): Promise<FollowUp[]> => {
+  const res = await api.get("/followups/cancelled");
+
+  return res.data.followUps;
+};
+
 /**
  * Employee Schedule
  */

@@ -7,6 +7,7 @@ import {
   Clock3,
   AlertTriangle,
   CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   upcoming: number;
   overdue: number;
   completed: number;
+  cancelled: number;
 };
 
 export default function FollowupStats({
@@ -21,6 +23,7 @@ export default function FollowupStats({
   upcoming,
   overdue,
   completed,
+  cancelled,
 }: Props) {
   const stats = [
     {
@@ -55,6 +58,14 @@ export default function FollowupStats({
       bg: "bg-green-100 dark:bg-green-950/40",
       border: "border-green-200 dark:border-green-900",
     },
+    {
+      label: "Cancelled",
+      value: cancelled,
+      icon: XCircle,
+      iconClass: "text-slate-600 dark:text-slate-400",
+      bg: "bg-slate-100 dark:bg-slate-900/40",
+      border: "border-slate-200 dark:border-slate-800",
+    },
   ];
 
   return (
@@ -75,12 +86,7 @@ export default function FollowupStats({
                 ${item.border}
               `}
             >
-              <div
-                className={`
-                  flex h-10 w-10 items-center justify-center
-                  rounded-lg bg-background shadow-sm
-                `}
-              >
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background shadow-sm">
                 <Icon className={`h-5 w-5 ${item.iconClass}`} />
               </div>
 
